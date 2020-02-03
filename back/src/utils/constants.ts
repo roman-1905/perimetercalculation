@@ -1,0 +1,2 @@
+export const DISTANCE_EQUIVALENCE_THRESHOLD = 3; //meters
+export const DISTANCE_DELTA = 0.00001 * DISTANCE_EQUIVALENCE_THRESHOLD; // Addind this to a coordinate moves the point DISTANCE_EQUIVALENCE_THRESHOLD meters in the direction in which is added (Lat/Long)

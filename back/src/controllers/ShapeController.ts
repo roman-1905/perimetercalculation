@@ -36,6 +36,21 @@ export class ShapeController {
 
     }
 
+    equivalent(shapeA: Shape, shapeB:Shape): boolean {
+        let equivalentPoints = 0;
+        shapeA.edges.map((edgeA: Point) => {
+            shapeB.edges.map((edgeB: Point) => {
+
+                if ( this.distanceService.equivalentPoints(edgeA, edgeB)) {
+                    equivalentPoints++;
+                }
+
+            });
+        });
+
+        return equivalentPoints === shapeA.edges.length;
+    }
+
     /**
      * Returns a new shape which edges are the ones in points parameter
      * @param points (JSON with edges coordinates, usually retrieved from req.body)
