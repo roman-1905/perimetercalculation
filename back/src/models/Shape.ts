@@ -1,21 +1,22 @@
 import { Point } from './Point';
+import { Segment } from './Segment';
 
 export interface ShapeAttributes {
-    edges: Point[];
+    sides: Segment[];
 }
 
 export class Shape implements ShapeAttributes {
 
-    edges!: Point[];
+    sides!: Segment[];
 
-    constructor(edges?: Point[]) {
-        if (edges) {
-            this.edges = edges;
+    constructor(sides?: Segment[]) {
+        if (sides) {
+            this.sides = sides;
         }
     }
 
-    getPoints(): Point[] {
-        return this.edges;
+    getSides(): Segment[] {
+        return this.sides;
     }
 
 

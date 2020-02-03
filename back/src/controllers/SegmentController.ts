@@ -56,13 +56,56 @@ export class SegmentController {
     );
   }
 
-  removeRepeatedSegments(segments: Segment[]): Segment[] {
-    console.log("original Segments[] en repeated: ", segments);
+  /**
+   * Returns an array with all segments that are repeated (if there are more than one repetition then it returns all those repeated elements)
+   * @param segments 
+   */
 
-    segments.forEach(segment => {
-      segments.forEach((anotherSegment, i) => {
+  findRepeatedSegments(segments: Segment[]): Segment[] {
+    // console.log("original Segments[] en repeated: ", segments);
+
+    const originalSegments = segments;
+
+    let repeated: Segment[] = [];
+
+    originalSegments.forEach(segment => {
+      originalSegments.forEach((anotherSegment, i) => {
         if (
           this.equivalentSegments(segment, anotherSegment) &&
+          segment !== anotherSegment
+        ) {
+          // console.count("Remove Segment");
+          // console.log(
+          //   anotherSegment.getFirstPoint(),
+          //   anotherSegment.getSecondPoint()
+          // );
+
+          repeated.push(...originalSegments.splice(i, 1));
+          
+        }
+      });
+    });
+
+    // console.log("deleted:", deleted);    
+
+    return repeated;
+  }
+  /**
+   * Return and array with all segments that are contained in another one in the set
+   * @param segments the segments to check
+   */
+  findCointainedSegments(segments: Segment[]): Segment[] {
+    console.log("original Segments[] en contained: ", segments);
+
+    const originalSegments: Segment[] = [];
+    originalSegments.push(...segments);
+
+    let overlapping: Segment[] = [];
+
+    originalSegments.forEach(segment => {
+      originalSegments.forEach((anotherSegment, i) => {
+        if (
+          this.isContained(anotherSegment, segment) &&
           segment !== anotherSegment
         ) {
           console.count("Remove Segment");
@@ -71,42 +114,22 @@ export class SegmentController {
             anotherSegment.getSecondPoint()
           );
 
-          segments.splice(i, 1);
-        }
-      });
-    });
-
-    console.log("result:", segments);
-
-    return segments;
-  }
-  /**
-   * Remove all segments that are contained in another one in the set
-   * @param segments the segments to check
-   */
-  removeCointained(segments: Segment[]): Segment[] {
-    console.log("original Segments[] en contained: ", segments);
-
-    segments.forEach(segment => {
-      segments.forEach((anotherSegment, i) => {
-        if (
-          this.isContained(anotherSegment, segment) &&
-          segment !== anotherSegment
-        ) {
-          console.count("Remove contained Segment");
+          console.log('that overlaps with: ');
           console.log(
-            anotherSegment.getFirstPoint(),
-            anotherSegment.getSecondPoint()
+            segment.getFirstPoint(),
+            segment.getSecondPoint()
           );
+          
 
-          segments.splice(i, 1);
+          overlapping.push(...originalSegments.splice(i, 1));
+          
         }
       });
     });
 
-    console.log("result:", segments);
+    console.log("overlapping:", overlapping);    
 
-    return segments;
+    return overlapping;
   }
 
   /**
@@ -122,14 +145,20 @@ export class SegmentController {
     allowOverlap?: boolean
   ): number {
     let distance = 0;
+    let alreadyAccounted: Segment[] = [];
 
-    if (!allowRepeated) {
-      segments = this.removeRepeatedSegments(segments);
-    }
+    // if (!allowRepeated) {
+    //   alreadyAccounted.push(...this.findRepeatedSegments(segments));      
+    // }
 
     if (!allowOverlap) {
-      segments = this.removeCointained(segments);
+      alreadyAccounted.push(...this.findCointainedSegments(segments)); 
     }
+
+    console.log('Segments a sumar:', segments);
+    console.log('Segments a restar: ', alreadyAccounted);
+    
+    
 
     segments.map((segment: Segment) => {
       distance += this.getDistanceBetweenSegmentEdges(segment, unit);
@@ -138,9 +167,4 @@ export class SegmentController {
     return distance;
   }
 
-  addSegment(segment: Segment, segments: Segment[], distance: number): number {
-    // segment has no overlap with the rest of the segments
-
-    return distance;
-  }
 }

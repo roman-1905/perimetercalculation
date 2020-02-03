@@ -94,7 +94,7 @@ export class DistanceService {
    */
   equivalentPoints(pointA: Point, pointB: Point): boolean {
     return (
-      this.calculateDistance(pointA, pointB) < DISTANCE_EQUIVALENCE_THRESHOLD;
+      this.calculateDistance(pointA, pointB) < DISTANCE_EQUIVALENCE_THRESHOLD
     );
   }
 

@@ -14,12 +14,12 @@ class DistanceRouter {
 
   init() {
     
-    /* GET the perimiter of an UP. */
-    this.router.get(
-      '/getperimeter',
-      (req: Request, res: Response, next: NextFunction) =>
-        controller.getUpPerimeter(req, res)
-    );
+    // /* GET the perimiter of an UP. */
+    // this.router.get(
+    //   '/getperimeter',
+    //   (req: Request, res: Response, next: NextFunction) =>
+    //     controller.getUpPerimeter(req, res)
+    // );
 
     /* GET the perimiter of several UPs. */
     this.router.get(
