@@ -2,7 +2,10 @@ import { Point } from "../models/Point";
 import LatLon from "geodesy/latlon-nvector-spherical.js";
 import inPairs from "inpairs";
 
-import { DISTANCE_EQUIVALENCE_THRESHOLD, DISTANCE_DELTA } from "../utils/constants";
+import {
+  DISTANCE_EQUIVALENCE_THRESHOLD,
+  DISTANCE_DELTA
+} from "../utils/constants";
 import { Segment } from "../models/Segment";
 
 export type DistanceUnits = "km" | "m" | "mi" | "ft";
@@ -100,22 +103,43 @@ export class DistanceService {
 
   /**
    * Check if a point is part of a segment
-   * @param point 
-   * @param segment 
+   * @param point
+   * @param segment
    */
   isEnclosed(point: Point, segment: Segment): boolean {
-
     const p = new LatLon(point.coordinates[0], point.coordinates[1]);
 
     // We amplify the segment in every direction by a DELTA factor (in meters) to account for possible measuring mistakes
 
     const polygon = [
-        new LatLon(segment.getFirstPoint().getLatitude() + DISTANCE_DELTA, segment.getFirstPoint().getLongitude() + DISTANCE_DELTA),
-        new LatLon(segment.getFirstPoint().getLatitude() - DISTANCE_DELTA, segment.getFirstPoint().getLongitude() - DISTANCE_DELTA),
-        new LatLon(segment.getSecondPoint().getLatitude() + DISTANCE_DELTA, segment.getSecondPoint().getLongitude() + DISTANCE_DELTA),
-        new LatLon(segment.getSecondPoint().getLatitude() - DISTANCE_DELTA, segment.getSecondPoint().getLongitude() - DISTANCE_DELTA)        
+      new LatLon(
+        segment.getFirstPoint().getLatitude() + DISTANCE_DELTA,
+        segment.getFirstPoint().getLongitude() + DISTANCE_DELTA
+      ),
+      new LatLon(
+        segment.getFirstPoint().getLatitude() - DISTANCE_DELTA,
+        segment.getFirstPoint().getLongitude() - DISTANCE_DELTA
+      ),
+      new LatLon(
+        segment.getSecondPoint().getLatitude() + DISTANCE_DELTA,
+        segment.getSecondPoint().getLongitude() + DISTANCE_DELTA
+      ),
+      new LatLon(
+        segment.getSecondPoint().getLatitude() - DISTANCE_DELTA,
+        segment.getSecondPoint().getLongitude() - DISTANCE_DELTA
+      )
     ];
 
-   return p.isEnclosedBy(polygon);
+    return p.isEnclosedBy(polygon);
+  }
+
+  closer(pointA: Point, pointB: Point, target: Point): Point {
+    let result: Point;
+    this.calculateDistance(pointA, target) <
+    this.calculateDistance(pointB, target)
+      ? (result = pointA)
+      : (result = pointB);
+
+    return result;
   }
 }

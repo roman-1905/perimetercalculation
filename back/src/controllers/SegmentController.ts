@@ -44,6 +44,21 @@ export class SegmentController {
     );
   }
 
+  deleteContaineeFromContainer(containee:Segment, container: Segment): Segment[] {
+
+    let newSegments: Segment[] = [];
+
+    this.distanceService.closer(containee.getFirstPoint(),containee.getSecondPoint(),container.getFirstPoint());
+
+    newSegments.push(new Segment([container.getFirstPoint(), this.distanceService.closer(containee.getFirstPoint(),containee.getSecondPoint(),container.getFirstPoint())]));
+
+    newSegments.push(new Segment([container.getSecondPoint(), this.distanceService.closer(containee.getFirstPoint(),containee.getSecondPoint(),container.getSecondPoint())]));
+    
+
+    return newSegments;
+
+  }
+
   /**
    * Returns wheter or not a point is an edge in a segment (using the threshold distance)
    * @param segment the segment
@@ -95,7 +110,7 @@ export class SegmentController {
    * @param segments the segments to check
    */
   findCointainedSegments(segments: Segment[]): Segment[] {
-    console.log("original Segments[] en contained: ", segments);
+    // console.log("original Segments[] en contained: ", segments);
 
     const originalSegments: Segment[] = [];
     originalSegments.push(...segments);
@@ -127,7 +142,7 @@ export class SegmentController {
       });
     });
 
-    console.log("overlapping:", overlapping);    
+    // console.log("overlapping:", overlapping);    
 
     return overlapping;
   }
@@ -155,8 +170,8 @@ export class SegmentController {
       alreadyAccounted.push(...this.findCointainedSegments(segments)); 
     }
 
-    console.log('Segments a sumar:', segments);
-    console.log('Segments a restar: ', alreadyAccounted);
+    // console.log('Segments a sumar:', segments);
+    // console.log('Segments a restar: ', alreadyAccounted);
     
     
 

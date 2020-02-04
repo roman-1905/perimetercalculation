@@ -1,140 +1,168 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from "express";
 
-import { Point } from '../models/Point';
-import { DistanceService, DistanceUnits } from '../services/DistanceService';
-import { Shape } from '../models/Shape';
-import { Segment } from '../models/Segment';
-import { SegmentController } from './SegmentController';
-import inPairs from 'inpairs';
-
+import { Point } from "../models/Point";
+import { DistanceService, DistanceUnits } from "../services/DistanceService";
+import { Shape } from "../models/Shape";
+import { Segment } from "../models/Segment";
+import { SegmentController } from "./SegmentController";
+import inPairs from "inpairs";
 
 export class ShapeController {
-    private distanceService = new DistanceService();
-    private segmentController = new SegmentController();
+  private distanceService = new DistanceService();
+  private segmentController = new SegmentController();
 
-    constructor() {
+  constructor() {}
+
+  /**
+   * Obtains the perimeter of a shape
+   * @param shape the shape which perimeter we want to calculate
+   * @param unit the unit in which we want the distance to be returned ('km' | 'm' | 'mi' | 'ft')
+   */
+
+  getShapePerimeter(shape: Shape, unit?: DistanceUnits): number {
+    return this.segmentController.aggregateSegments(shape.sides, unit);
+  }
+
+  equivalent(shapeA: Shape, shapeB: Shape): boolean {
+    if (shapeA.sides.length !== shapeB.sides.length) {
+      return false;
     }
 
-    /**
-     * Obtains the perimeter of a shape
-     * @param shape the shape which perimeter we want to calculate
-     * @param unit the unit in which we want the distance to be returned ('km' | 'm' | 'mi' | 'ft')
-     */
-
-    getShapePerimeter(shape: Shape, unit?: DistanceUnits): number {
-
-        return this.segmentController.aggregateSegments(shape.sides, unit);
-
-    }
-
-    equivalent(shapeA: Shape, shapeB: Shape): boolean {
-
-        if (shapeA.sides.length !== shapeB.sides.length) {
-            return false;
+    let equivalentSides = 0;
+    shapeA.sides.map((sideA: Segment) => {
+      shapeB.sides.map((sideB: Segment) => {
+        if (this.segmentController.equivalentSegments(sideA, sideB)) {
+          equivalentSides++;
         }
+      });
+    });
 
-        let equivalentSides = 0;
-        shapeA.sides.map((sideA: Segment) => {
-            shapeB.sides.map((sideB: Segment) => {
+    return equivalentSides === shapeA.sides.length;
+  }
 
-                if (this.segmentController.equivalentSegments(sideA, sideB)) {
-                    equivalentSides++;
-                }
+  /**
+   * Return an array of Shape objects based on the passed coordinates
+   * @param data the coordinates, usually retrieved from the request
+   */
 
-            });
-        });
+  makeShapes(data: any): Shape[] {
+    let shapes: Shape[] = [];
 
-        return equivalentSides === shapeA.sides.length;
-    }
+    data.map((up: any) => {
+      let segments: Segment[] = [];
 
-    /**
-     * Return an array of Shape objects based on the passed coordinates
-     * @param data the coordinates, usually retrieved from the request
-     */
+      inPairs(up, (pointA: any, pointB: any) => {
+        const point1 = new Point([
+          Number(pointA["lat"]),
+          Number(pointA["long"])
+        ]);
+        const point2 = new Point([
+          Number(pointB["lat"]),
+          Number(pointB["long"])
+        ]);
 
-    makeShapes(data: any): Shape[] {
+        segments.push(new Segment([point1, point2]));
+      });
 
-        let shapes: Shape[] = [];
+      const point1 = new Point([
+        Number(up[up.length - 1]["lat"]),
+        Number(up[up.length - 1]["long"])
+      ]);
+      const point2 = new Point([Number(up[0]["lat"]), Number(up[0]["long"])]);
 
-        data.map((up: any) => {
-            let segments: Segment[] = [];
+      segments.push(new Segment([point1, point2]));
 
-            inPairs(up, (pointA: any, pointB: any) => {
+      shapes.push(new Shape(segments));
+    });
 
-                const point1 = new Point([Number(pointA['lat']), Number(pointA['long'])]);
-                const point2 = new Point([Number(pointB['lat']), Number(pointB['long'])]);
+    return shapes;
+  }
 
-                segments.push(new Segment([point1, point2]));
+  logShape(shape: Shape) {
+    console.log("Shape:");
+    shape.sides.forEach((side: Segment) => {
+      console.log("Segment:", side.getFirstPoint(), side.getSecondPoint());
+    });
+  }
 
-            });
+  removeDuplicates(shapes: Shape[]): Shape[] {
+    shapes.forEach((shapeA, indexA) => {
+      shapes.forEach((shapeB, indexB) => {
+        if (indexA !== indexB && this.equivalent(shapeA, shapeB)) {
+          console.log("remove duplicate:");
+          this.logShape(shapeA);
+          this.logShape(shapeB);
+          shapes.splice(indexB, 1);
+        }
+      });
+    });
 
-            const point1 = new Point([Number(up[up.length - 1]['lat']), Number(up[up.length - 1]['long'])]);
-            const point2 = new Point([Number(up[0]['lat']), Number(up[0]['long'])]);
+    return shapes;
+  }
 
-            segments.push(new Segment([point1, point2]));
+  mergeMultipleShapes(shapes: Shape[]): Shape {
+    // If only one shape was sent as parameter return that as the result
+    if (shapes.length === 1) return shapes[0];
 
-            shapes.push(new Shape(segments));
+    let result: Shape = new Shape([]);
 
-        });
+    // Build a new shape that only has the perimeter of the original shapes
+    shapes.forEach((shape: Shape) => {
+      result = this.mergeShapes(shape, result);
+    });
 
-        return shapes;
+    return result;
+  }
 
-    }
+  /**
+   * Merge two shapes into a new one that only has their external segments, disregarding internal ones
+   * @param shapeA
+   * @param shapeB
+   */
 
-    removeDuplicates(shapes: Shape[]): Shape[] {
+  mergeShapes(shapeA: Shape, shapeB: Shape): Shape {
+    let newSides = shapeA.sides.concat(...shapeB.sides);
 
-        shapes.forEach(shapeA => {
-            shapes.forEach((shapeB, indexB) => {
-                if (this.equivalent(shapeA, shapeB)) {
-                    shapes.splice(indexB,1);
-                }                
-            });
-        });
+    // console.log("Original sides:");
+    // newSides.forEach((segment: Segment) => {
+    //   console.log(segment.getFirstPoint(), segment.getSecondPoint());
+    // });
 
-        return shapes;
-    }
+    newSides.forEach((sideA, indexA) => {
+      newSides.forEach((sideB, indexB) => {
+        // if it is NOT the same element
+        if (indexA !== indexB) {
+          // If the segments are equivalent remove them
+          if (this.segmentController.equivalentSegments(sideA, sideB)) {
+            console.log(
+              "Remove: ",
+              sideB.getFirstPoint(),
+              sideB.getSecondPoint()
+            );
 
-    mergeMultipleShapes(shapes: Shape[], allowDuplicates?:boolean): Shape {
+            newSides.splice(indexA, 1);
+            newSides.splice(indexB, 1);
+          }
 
-        console.log('merge multiple con shapes: ', shapes);
-        
+          //   If a segment is contained in another one we should disregard it and also erase that portion form the container segment
 
-        if (shapes.length === 1) return shapes[0];
+          if (this.segmentController.isContained(sideB, sideA)) {
+            // remove containee
+            newSides.splice(indexB, 1);
 
-        let result: Shape = new Shape([]);
+            // remove the container, and add two subsegments (the result of substracting the containee from the container)
+            newSides.splice(indexA, 1);
+            newSides.push(
+              ...this.segmentController.deleteContaineeFromContainer(
+                sideB,
+                sideA
+              )
+            );
+          }
+        }
+      });
+    });
 
-        if (!allowDuplicates){
-            shapes = this.removeDuplicates(shapes);
-        }       
-        
-        console.log('desp de remover duplicados:', shapes);
-        
-
-        shapes.forEach((shape: Shape) => {
-            result = this.mergeShapes(shape, result);
-        });
-
-        return result;
-
-    }
-
-    mergeShapes(shapeA: Shape, shapeB: Shape): Shape {
-        let newSides = shapeA.sides.concat(...shapeB.sides);
-
-        console.log('Original sides', newSides);
-
-        newSides.forEach((sideA, indexA) => {
-            newSides.forEach((sideB, indexB) => {
-
-                if (this.segmentController.equivalentSegments(sideA, sideB)){
-                    newSides.splice(indexA, 1);
-                    newSides.splice(indexB, 1);
-                }
-
-            });
-        });
-
-
-        return new Shape(newSides);
-    }
+    return new Shape(newSides);
+  }
 }
