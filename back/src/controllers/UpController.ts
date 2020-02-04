@@ -3,6 +3,7 @@ import HTTP_STATUS from 'http-status-codes';
 import { DistanceService, DistanceUnits } from '../services/DistanceService';
 import { SegmentController } from './SegmentController';
 import { ShapeController } from './ShapeController';
+import { Shape } from '../models/Shape';
 
 
 export class UpController {
@@ -34,8 +35,13 @@ export class UpController {
         const unit: DistanceUnits = req.body.unit;     
         const ups = this.shapeController.makeShapes(req.body.ups);   
 
+        
+
         // merge multiple UPs into a single UP with only the perimeter from the set of original UPs
-        const globalUP = this.shapeController.mergeMultipleShapes(ups);
+        let globalUP: Shape;
+        ups.length === 1 ? globalUP = ups[0] : globalUP = this.shapeController.mergeMultipleShapes(ups);
+
+        this.shapeController.logShape(globalUP, 'GlobalUP');
 
         distance = this.shapeController.getShapePerimeter(globalUP, unit);
 

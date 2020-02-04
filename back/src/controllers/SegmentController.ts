@@ -1,14 +1,14 @@
 import { Request, Response, NextFunction } from "express";
 
 import { Point } from "../models/Point";
-import { Segment } from "../models/Segment";
+import { Segment } from '../models/Segment';
 import { DistanceService, DistanceUnits } from "../services/DistanceService";
 import { Shape } from "../models/Shape";
 
 export class SegmentController {
   private distanceService = new DistanceService();
 
-  constructor() {}
+  constructor() { }
 
   /**
    * Returns the distance between the edges of a segment
@@ -38,22 +38,25 @@ export class SegmentController {
   }
 
   isContained(containee: Segment, container: Segment): boolean {
-    return (
+  const result = (
       this.distanceService.isEnclosed(containee.getFirstPoint(), container) &&
       this.distanceService.isEnclosed(containee.getSecondPoint(), container)
     );
+    console.log('Resultado de iscontained: ', result);
+    
+    return result;
   }
 
-  deleteContaineeFromContainer(containee:Segment, container: Segment): Segment[] {
+  deleteContaineeFromContainer(containee: Segment, container: Segment): Segment[] {
 
     let newSegments: Segment[] = [];
 
-    this.distanceService.closer(containee.getFirstPoint(),containee.getSecondPoint(),container.getFirstPoint());
+    this.distanceService.closer(containee.getFirstPoint(), containee.getSecondPoint(), container.getFirstPoint());
 
-    newSegments.push(new Segment([container.getFirstPoint(), this.distanceService.closer(containee.getFirstPoint(),containee.getSecondPoint(),container.getFirstPoint())]));
+    newSegments.push(new Segment([container.getFirstPoint(), this.distanceService.closer(containee.getFirstPoint(), containee.getSecondPoint(), container.getFirstPoint())]));
 
-    newSegments.push(new Segment([container.getSecondPoint(), this.distanceService.closer(containee.getFirstPoint(),containee.getSecondPoint(),container.getSecondPoint())]));
-    
+    newSegments.push(new Segment([container.getSecondPoint(), this.distanceService.closer(containee.getFirstPoint(), containee.getSecondPoint(), container.getSecondPoint())]));
+
 
     return newSegments;
 
@@ -96,7 +99,7 @@ export class SegmentController {
           // );
 
           repeated.push(...originalSegments.splice(i, 1));
-          
+
         }
       });
     });
@@ -134,10 +137,10 @@ export class SegmentController {
             segment.getFirstPoint(),
             segment.getSecondPoint()
           );
-          
+
 
           overlapping.push(...originalSegments.splice(i, 1));
-          
+
         }
       });
     });
@@ -167,19 +170,26 @@ export class SegmentController {
     // }
 
     if (!allowOverlap) {
-      alreadyAccounted.push(...this.findCointainedSegments(segments)); 
+      alreadyAccounted.push(...this.findCointainedSegments(segments));
     }
 
     // console.log('Segments a sumar:', segments);
     // console.log('Segments a restar: ', alreadyAccounted);
-    
-    
+
+
 
     segments.map((segment: Segment) => {
       distance += this.getDistanceBetweenSegmentEdges(segment, unit);
     });
 
     return distance;
+  }
+
+  logSegment(segment: Segment, leyend?: string) {
+    let title: string;
+    leyend ? title = leyend : title = 'Segment';
+    console.log(`${title}:`, '(', segment.getFirstPoint(), ',', segment.getSecondPoint(),')');
+
   }
 
 }

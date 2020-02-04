@@ -7,11 +7,12 @@ import {
   DISTANCE_DELTA
 } from "../utils/constants";
 import { Segment } from "../models/Segment";
+import { SegmentController } from "../controllers/SegmentController";
 
 export type DistanceUnits = "km" | "m" | "mi" | "ft";
 
 export class DistanceService {
-  constructor() {}
+  constructor() { }
 
   /**
    * Returns the distance between two points
@@ -107,9 +108,18 @@ export class DistanceService {
    * @param segment
    */
   isEnclosed(point: Point, segment: Segment): boolean {
+    console.log('\n en enclosed:');
+    console.log('Point:', point);
+    console.log('Segment: ');
+    console.log(segment.edges);
+
     const p = new LatLon(point.coordinates[0], point.coordinates[1]);
 
     // We amplify the segment in every direction by a DELTA factor (in meters) to account for possible measuring mistakes
+
+    // if (segment.getFirstPoint().getLatitude() < segment.getSecondPoint().getLatitude()) {
+
+    // }
 
     const polygon = [
       new LatLon(
@@ -117,11 +127,11 @@ export class DistanceService {
         segment.getFirstPoint().getLongitude() + DISTANCE_DELTA
       ),
       new LatLon(
-        segment.getFirstPoint().getLatitude() - DISTANCE_DELTA,
+        segment.getFirstPoint().getLatitude() + DISTANCE_DELTA,
         segment.getFirstPoint().getLongitude() - DISTANCE_DELTA
       ),
       new LatLon(
-        segment.getSecondPoint().getLatitude() + DISTANCE_DELTA,
+        segment.getSecondPoint().getLatitude() - DISTANCE_DELTA,
         segment.getSecondPoint().getLongitude() + DISTANCE_DELTA
       ),
       new LatLon(
@@ -130,13 +140,32 @@ export class DistanceService {
       )
     ];
 
-    return p.isEnclosedBy(polygon);
+    console.log(polygon);
+
+
+    const result = p.isEnclosedBy(polygon);
+
+    // const result = p.isWithinExtent(new LatLon(
+    //   segment.getFirstPoint().getLatitude(),
+    //   segment.getFirstPoint().getLongitude()
+    // ), new LatLon(
+    //   segment.getSecondPoint().getLatitude(),
+    //   segment.getSecondPoint().getLongitude()
+    // ));
+
+
+    console.log(result);
+    console.log('----------------\n');
+
+
+
+    return result;
   }
 
   closer(pointA: Point, pointB: Point, target: Point): Point {
     let result: Point;
     this.calculateDistance(pointA, target) <
-    this.calculateDistance(pointB, target)
+      this.calculateDistance(pointB, target)
       ? (result = pointA)
       : (result = pointB);
 
