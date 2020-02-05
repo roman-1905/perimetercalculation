@@ -169,9 +169,9 @@ export class SegmentController {
     //   alreadyAccounted.push(...this.findRepeatedSegments(segments));      
     // }
 
-    if (!allowOverlap) {
-      alreadyAccounted.push(...this.findCointainedSegments(segments));
-    }
+    // if (!allowOverlap) {
+    //   alreadyAccounted.push(...this.findCointainedSegments(segments));
+    // }
 
     // console.log('Segments a sumar:', segments);
     // console.log('Segments a restar: ', alreadyAccounted);

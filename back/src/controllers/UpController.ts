@@ -28,7 +28,7 @@ export class UpController {
 
     // }
 
-    getMultipleUpsPerimeter(req: Request, res: Response) {
+    async getMultipleUpsPerimeter(req: Request, res: Response) {
 
         let distance = 0;
 
@@ -39,7 +39,7 @@ export class UpController {
 
         // merge multiple UPs into a single UP with only the perimeter from the set of original UPs
         let globalUP: Shape;
-        ups.length === 1 ? globalUP = ups[0] : globalUP = this.shapeController.mergeMultipleShapes(ups);
+        ups.length === 1 ? globalUP = ups[0] : globalUP = await this.shapeController.mergeMultipleShapes(ups);
 
         this.shapeController.logShape(globalUP, 'GlobalUP');
 

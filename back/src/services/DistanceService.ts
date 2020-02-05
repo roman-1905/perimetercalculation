@@ -106,7 +106,7 @@ export class DistanceService {
     //test if the point c is inside a pre-defined distance (tolerance) from the line
 
     if (!tolerance) {
-        tolerance = DISTANCE_EQUIVALENCE_THRESHOLD;
+      tolerance = DISTANCE_EQUIVALENCE_THRESHOLD;
     }
 
     let distance = Math.abs(
@@ -123,37 +123,23 @@ export class DistanceService {
     if (distance > tolerance) return false;
 
     //test if the point c is between a and b
-    let dotproduct = (c.getLongitude() - a.getLongitude()) * (b.getLongitude() - a.getLongitude()) + (c.getLatitude() - a.getLatitude()) * (b.getLatitude() - a.getLatitude());
+    let dotproduct =
+      (c.getLongitude() - a.getLongitude()) *
+        (b.getLongitude() - a.getLongitude()) +
+      (c.getLatitude() - a.getLatitude()) * (b.getLatitude() - a.getLatitude());
     if (dotproduct < 0) {
       return false;
     }
 
-    var squaredlengthba = (b.getLongitude() - a.getLongitude()) * (b.getLongitude() - a.getLongitude()) + (b.getLatitude() - a.getLatitude()) * (b.getLatitude() - a.getLatitude());
+    var squaredlengthba =
+      (b.getLongitude() - a.getLongitude()) *
+        (b.getLongitude() - a.getLongitude()) +
+      (b.getLatitude() - a.getLatitude()) * (b.getLatitude() - a.getLatitude());
     if (dotproduct > squaredlengthba) {
       return false;
     }
 
     return true;
-  }
-
-  /**
-   * Check if a point is part of a segment
-   * @param point
-   * @param segment
-   */
-  isEnclosed(point: Point, segment: Segment): boolean {
-    console.log("\n en enclosed:");
-    console.log("Point:", point);
-    console.log("Segment: ");
-    console.log(segment.edges);
-
-    const result = this.isBetween(segment.getFirstPoint(), segment.getSecondPoint(), point);
-
-
-    console.log(result);
-    console.log("----------------\n");
-
-    return result;
   }
 
   //   /**
@@ -162,64 +148,97 @@ export class DistanceService {
   //    * @param segment
   //    */
   //   isEnclosed(point: Point, segment: Segment): boolean {
-  //     console.log('\n en enclosed:');
-  //     console.log('Point:', point);
-  //     console.log('Segment: ');
+  //     console.log("\n en enclosed:");
+  //     console.log("Point:", point);
+  //     console.log("Segment: ");
   //     console.log(segment.edges);
 
-  //     const p = new LatLon(point.coordinates[0], point.coordinates[1]);
-
-  //     // We amplify the segment in every direction by a DELTA factor (in meters) to account for possible measuring mistakes
-
-  //     // if (segment.getFirstPoint().getLatitude() < segment.getSecondPoint().getLatitude()) {
-
-  //     // }
-
-  //     const latEdge1 = segment.getFirstPoint().getLatitude();
-  //     const latEdge2 = segment.getSecondPoint().getLatitude();
-  //     const longEdge1 = segment.getFirstPoint().getLongitude();
-  //     const longEdge2 = segment.getSecondPoint().getLongitude();
-
-  //     const polygon = [
-  //         // southern eastern point
-  //       new LatLon(
-  //         latEdge1 < latEdge2 ? segment.getFirstPoint().getLatitude() - DISTANCE_DELTA : segment.getSecondPoint().getLatitude() - DISTANCE_DELTA,
-  //         longEdge1 < longEdge2 ? segment.getFirstPoint().getLongitude() - DISTANCE_DELTA : segment.getSecondPoint().getLongitude() - DISTANCE_DELTA
-  //       ),
-  //     //   southern western point
-  //     new LatLon(
-  //         latEdge1 < latEdge2 ? segment.getFirstPoint().getLatitude() - DISTANCE_DELTA : segment.getSecondPoint().getLatitude() - DISTANCE_DELTA,
-  //         longEdge1 < longEdge2 ? segment.getSecondPoint().getLongitude() + DISTANCE_DELTA : segment.getFirstPoint().getLongitude() + DISTANCE_DELTA
-  //       ),
-  //     //   northern western point
-  //     new LatLon(
-  //         latEdge1 < latEdge2 ? segment.getSecondPoint().getLatitude() + DISTANCE_DELTA : segment.getFirstPoint().getLatitude() + DISTANCE_DELTA,
-  //         longEdge1 < longEdge2 ? segment.getSecondPoint().getLongitude() + DISTANCE_DELTA : segment.getFirstPoint().getLongitude() + DISTANCE_DELTA
-  //       ),
-  //     //   northern eastern point
-  //     new LatLon(
-  //         latEdge1 < latEdge2 ? segment.getSecondPoint().getLatitude() + DISTANCE_DELTA : segment.getFirstPoint().getLatitude() + DISTANCE_DELTA,
-  //         longEdge1 < longEdge2 ? segment.getFirstPoint().getLongitude() - DISTANCE_DELTA : segment.getSecondPoint().getLongitude() - DISTANCE_DELTA
-  //       )
-  //     ];
-
-  //     console.log(polygon);
-
-  //     const result = p.isEnclosedBy(polygon);
-
-  //     // const result = p.isWithinExtent(new LatLon(
-  //     //   segment.getFirstPoint().getLatitude(),
-  //     //   segment.getFirstPoint().getLongitude()
-  //     // ), new LatLon(
-  //     //   segment.getSecondPoint().getLatitude(),
-  //     //   segment.getSecondPoint().getLongitude()
-  //     // ));
+  //     const result = this.isBetween(segment.getFirstPoint(), segment.getSecondPoint(), point);
 
   //     console.log(result);
-  //     console.log('----------------\n');
+  //     console.log("----------------\n");
 
   //     return result;
   //   }
+
+  /**
+   * Check if a point is part of a segment
+   * @param point
+   * @param segment
+   */
+  isEnclosed(point: Point, segment: Segment): boolean {
+    // console.log("\n en enclosed:");
+    // console.log("Point:", point);
+    // console.log("Segment: ");
+    // console.log(segment.edges);
+
+    const latEdge1 = segment.getFirstPoint().getLatitude();
+    const latEdge2 = segment.getSecondPoint().getLatitude();
+    const longEdge1 = segment.getFirstPoint().getLongitude();
+    const longEdge2 = segment.getSecondPoint().getLongitude();
+
+    const southEast = new Point([
+      latEdge1 < latEdge2
+        ? segment.getFirstPoint().getLatitude() - DISTANCE_DELTA
+        : segment.getSecondPoint().getLatitude() - DISTANCE_DELTA,
+      longEdge1 < longEdge2
+        ? segment.getFirstPoint().getLongitude() - DISTANCE_DELTA
+        : segment.getSecondPoint().getLongitude() - DISTANCE_DELTA
+    ]);
+
+    const northEast = new Point([
+      latEdge1 < latEdge2
+        ? segment.getSecondPoint().getLatitude() + DISTANCE_DELTA
+        : segment.getFirstPoint().getLatitude() + DISTANCE_DELTA,
+      longEdge1 < longEdge2
+        ? segment.getFirstPoint().getLongitude() - DISTANCE_DELTA
+        : segment.getSecondPoint().getLongitude() - DISTANCE_DELTA
+    ]);
+
+    const southWest = new Point([
+      latEdge1 < latEdge2
+        ? segment.getFirstPoint().getLatitude() - DISTANCE_DELTA
+        : segment.getSecondPoint().getLatitude() - DISTANCE_DELTA,
+      longEdge1 < longEdge2
+        ? segment.getSecondPoint().getLongitude() + DISTANCE_DELTA
+        : segment.getFirstPoint().getLongitude() + DISTANCE_DELTA
+    ]);
+
+    const northWest = new Point([
+      latEdge1 < latEdge2
+        ? segment.getSecondPoint().getLatitude() + DISTANCE_DELTA
+        : segment.getFirstPoint().getLatitude() + DISTANCE_DELTA,
+      longEdge1 < longEdge2
+        ? segment.getSecondPoint().getLongitude() + DISTANCE_DELTA
+        : segment.getFirstPoint().getLongitude() + DISTANCE_DELTA
+    ]);
+
+    return this.isBetweenCoordinates(
+      point,
+      southEast,
+      southWest,
+      northEast,
+      northWest
+    );
+  }
+
+  isBetweenCoordinates(
+    point: Point,
+    se: Point,
+    sw: Point,
+    ne: Point,
+    nw: Point
+  ): boolean {
+
+    if ((point.getLatitude() < se.getLatitude() && point.getLatitude() < sw.getLatitude()) ||
+    (point.getLatitude() > ne.getLatitude() && point.getLatitude() > nw.getLatitude()) ||
+    (point.getLongitude() < se.getLongitude() && point.getLongitude() < ne.getLongitude()) ||
+    (point.getLongitude() > sw.getLongitude() && point.getLongitude() > nw.getLongitude())) {
+        return false;
+    }
+
+    return true;
+  }
 
   closer(pointA: Point, pointB: Point, target: Point): Point {
     let result: Point;

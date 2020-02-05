@@ -11,7 +11,7 @@ export class ShapeController {
   private distanceService = new DistanceService();
   private segmentController = new SegmentController();
 
-  constructor() { }
+  constructor() {}
 
   /**
    * Obtains the perimeter of a shape
@@ -80,7 +80,7 @@ export class ShapeController {
 
   logShape(shape: Shape, leyend?: string) {
     let title: string;
-    leyend ? title = `${leyend} - Shape: ` : title = 'Shape';
+    leyend ? (title = `${leyend} - Shape: `) : (title = "Shape");
     console.log(title);
     shape.sides.forEach((side: Segment) => {
       console.log("Segment:", side.getFirstPoint(), side.getSecondPoint());
@@ -103,7 +103,6 @@ export class ShapeController {
   }
 
   mergeMultipleShapes(shapes: Shape[]): Shape {
-
     let result: Shape = new Shape([]);
 
     // Build a new shape that only has the perimeter of the original shapes
@@ -112,9 +111,15 @@ export class ShapeController {
       // this.logShape(shape, '\n Shape to merge');
       // this.logShape(result, 'Result ');
       // console.log('\n');
-      
+    });
 
-
+    result.sides.forEach((segment, index) => {
+      if (segment.getFirstPoint() === segment.getSecondPoint()) {
+          console.log('removiendo segmento nulo');
+          this.segmentController.logSegment(segment);
+          
+        result.sides.splice(index, 1);
+      }
     });
 
     return result;
@@ -136,25 +141,25 @@ export class ShapeController {
 
     newSides.forEach((sideA, indexA) => {
       newSides.forEach((sideB, indexB) => {
-        console.log('por chequear: ');
-        this.segmentController.logSegment(sideA,'SideA');
-        this.segmentController.logSegment(sideB, 'SideB');        
-        
+        console.log("por chequear: ");
+        this.segmentController.logSegment(sideA, "SideA");
+        this.segmentController.logSegment(sideB, "SideB");
+
         // if it is NOT the same element
         if (indexA !== indexB) {
-          console.log('No son iguales, entra a comparar');
-          
-          // If the segments are equivalent remove them
-          if (this.segmentController.equivalentSegments(sideA, sideB)) {
-            console.log(
-              "Remove equivalent: ",
-              sideB.getFirstPoint(),
-              sideB.getSecondPoint()
-            );
+          console.log("No son iguales, entra a comparar");
 
-            newSides.splice(indexA, 1);
-            newSides.splice(indexB, 1);
-          }
+          //   // If the segments are equivalent remove them
+          //   if (this.segmentController.equivalentSegments(sideA, sideB)) {
+          //     console.log(
+          //       "Remove equivalent: ",
+          //       sideB.getFirstPoint(),
+          //       sideB.getSecondPoint()
+          //     );
+
+          //     newSides.splice(indexA, 1);
+          //     newSides.splice(indexB, 1);
+          //   }
 
           //   If a segment is contained in another one we should disregard it and also erase that portion form the container segment
 
@@ -177,7 +182,7 @@ export class ShapeController {
             );
           }
         }
-        console.log('---------------\n');
+        console.log("---------------\n");
       });
     });
 
